@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  
+  body {
+    @apply bg-slate-950 text-slate-100;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Sora', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-5 py-2.5 rounded-xl
+           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-800 hover:bg-slate-700 text-slate-100 font-semibold px-5 py-2.5 rounded-xl
+           border border-slate-700 transition-all duration-200 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-slate-400 hover:text-slate-100 hover:bg-slate-800 px-4 py-2 rounded-lg
+           transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden;
+  }
+
+  .input {
+    @apply w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100
+           placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-2
+           focus:ring-brand-500/20 transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-400 mb-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .status-pending    { @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/30; }
+  .status-confirmed  { @apply badge bg-blue-500/15 text-blue-400 border border-blue-500/30; }
+  .status-preparing  { @apply badge bg-purple-500/15 text-purple-400 border border-purple-500/30; }
+  .status-ready      { @apply badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30; }
+  .status-delivered  { @apply badge bg-slate-500/15 text-slate-400 border border-slate-500/30; }
+  .status-cancelled  { @apply badge bg-red-500/15 text-red-400 border border-red-500/30; }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-warm {
+    @apply bg-gradient-to-r from-amber-300 via-brand-400 to-rose-400 bg-clip-text text-transparent;
+  }
+
+  .bg-mesh {
+    background-image:
+      radial-gradient(at 20% 20%, rgba(249, 115, 22, 0.12) 0px, transparent 50%),
+      radial-gradient(at 80% 10%, rgba(251, 146, 60, 0.08) 0px, transparent 45%),
+      radial-gradient(at 60% 80%, rgba(234, 88, 12, 0.06) 0px, transparent 50%),
+      radial-gradient(at 10% 90%, rgba(244, 63, 94, 0.05) 0px, transparent 40%);
+  }
+
+  .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl;
+  }
+
+  .hero-glow {
+    @apply absolute rounded-full blur-3xl opacity-40 animate-pulse-glow;
+  }
+
+  .food-card-hover {
+    @apply transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-500/40;
+  }
+
+  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+  .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+  .stagger-5 { animation-delay: 0.5s; opacity: 0; }
+  .stagger-6 { animation-delay: 0.6s; opacity: 0; }
+
+  .shimmer-text {
+    background: linear-gradient(90deg, #fb923c 0%, #fbbf24 50%, #fb923c 100%);
+    background-size: 200% auto;
+    @apply bg-clip-text text-transparent animate-shimmer;
+  }
+}
