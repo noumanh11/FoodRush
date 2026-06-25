@@ -87,7 +87,7 @@ In development, TypeORM auto-synchronizes the schema from entities.
 npm run seed
 ```
 
-Creates admin, restaurant owner, customer accounts, and sample restaurant with menu items.
+Creates admin, restaurant owners, customers, six restaurants with menus, and local SVG `imageUrl` values. Re-running the seed updates images on existing records without duplicating data.
 
 ### 5. Configure Frontend
 
@@ -108,6 +108,13 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+**Useful frontend scripts:**
+
+```bash
+npm run dev:clean        # Clear .next cache and start dev (fixes chunk/cache errors)
+npm run generate:images  # Regenerate restaurant and menu SVG assets
+```
 
 ## Docker Compose Reference
 
@@ -298,7 +305,8 @@ pm2 start npm --name foodrush-web -- start
 
 | Service | Endpoint |
 |---------|----------|
-| API | `GET http://localhost:3001/api/restaurants` |
+| API | `GET http://localhost:3001/api` |
+| API (data) | `GET http://localhost:3001/api/restaurants` |
 | Frontend | `GET http://localhost:3000` |
 | Database | `docker compose exec postgres pg_isready` |
 
@@ -312,6 +320,8 @@ pm2 start npm --name foodrush-web -- start
 | Chatbot errors | Verify `GROQ_API_KEY` is set and valid |
 | Migration failures | Ensure DB is empty or run `migration:run` on clean DB |
 | Port in use | Change `PORT` in backend `.env` or stop conflicting process |
+| Next.js chunk/cache errors | Run `npm run dev:clean` in `frontend/`; use only one dev server |
+| `Cannot GET /api` in browser | Use `GET /api` on port **3001** (backend), not port 3000 (frontend) |
 
 ## Related Documentation
 

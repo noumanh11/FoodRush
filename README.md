@@ -7,7 +7,7 @@ A full-stack food ordering platform with customer ordering, restaurant managemen
 - **Customers** — Browse restaurants, view menus, place orders, track status
 - **Restaurant owners** — Manage menu items, process orders, update order status
 - **Admins** — Monitor all orders, cancel orders platform-wide
-- **Chatbot** — Groq-powered food discovery from live menu data
+- **Chatbot** — Groq-powered food discovery from live menu data (local search fallback without API key)
 
 ## Tech Stack
 
@@ -36,12 +36,16 @@ npm install
 npm run start:dev
 ```
 
+API runs at [http://localhost:3001/api](http://localhost:3001/api).
+
 ### 3. Seed demo data
 
 ```bash
 cd backend
 npm run seed
 ```
+
+Creates 6 restaurants, 33 menu items, 4 customers, 6 restaurant owners, and 1 admin — all with local SVG image URLs.
 
 ### 4. Frontend
 
@@ -54,13 +58,24 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+If you see chunk or cache errors after switching between `build` and `dev`:
+
+```bash
+cd frontend
+npm run dev:clean
+```
+
 ## Demo Accounts
 
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | `admin@foodrush.com` | `admin123` |
-| Restaurant | `restaurant@foodrush.com` | `rest123` |
 | Customer | `customer@foodrush.com` | `cust123` |
+| Customer | `sara@foodrush.com` | `cust123` |
+| Restaurant | `restaurant@foodrush.com` | `rest123` |
+| Restaurant | `wok@foodrush.com` | `rest123` |
+
+All restaurant owner accounts use password `rest123`. See [Database Design](./docs/database-design.md#seed-data) for the full list.
 
 ## Documentation
 
@@ -76,6 +91,8 @@ Open [http://localhost:3000](http://localhost:3000).
 ## API
 
 Base URL: `http://localhost:3001/api`
+
+Health check: `GET /api` — returns API status and available route prefixes.
 
 See [API Specification](./docs/api-specification.md) for full endpoint documentation.
 
@@ -93,16 +110,27 @@ FoodRush/
 │       ├── menus/
 │       ├── orders/
 │       ├── chatbot/
+│       ├── seed-data.ts
+│       ├── seed.ts
 │       └── migrations/
 ├── frontend/         # Next.js app
+│   ├── public/images/   # Restaurant & menu SVG assets
 │   └── src/
-│       ├── app/      # Pages
+│       ├── app/         # Pages
 │       ├── components/
 │       ├── context/
 │       └── lib/
 ├── docs/             # Documentation
 └── docker-compose.yml
 ```
+
+## Scripts
+
+| Location | Command | Description |
+|----------|---------|-------------|
+| `backend/` | `npm run seed` | Populate demo users, restaurants, menus |
+| `frontend/` | `npm run generate:images` | Regenerate food SVG assets |
+| `frontend/` | `npm run dev:clean` | Clear `.next` cache and start dev server |
 
 ## License
 

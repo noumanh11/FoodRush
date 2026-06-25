@@ -59,6 +59,7 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph AppModule
+        AppController["AppController"]
         AuthModule["AuthModule"]
         UsersModule["UsersModule"]
         RestaurantsModule["RestaurantsModule"]
@@ -226,11 +227,18 @@ flowchart TB
         API["lib/api.ts — Axios client"]
         Navbar["Navbar"]
         StatusBadge["StatusBadge"]
+        RestaurantCart["RestaurantCart<br/>floating bar + sheet"]
+    end
+
+    subgraph Assets
+        PublicImages["public/images/<br/>restaurant & menu SVGs"]
     end
 
     Pages --> AuthCtx
     Pages --> CartCtx
     Pages --> API
+    Restaurant --> RestaurantCart
+    Restaurant --> PublicImages
     AuthCtx --> API
     CartCtx --> API
 ```
@@ -242,6 +250,16 @@ flowchart TB
 - `/dashboard` restricted to `restaurant` role
 - `/admin` restricted to `admin` role
 - Navbar links adapt based on current user role
+
+### Cart UX (Restaurant Page)
+
+- Desktop: sticky order sidebar appears only when the cart has items for the current restaurant
+- Mobile: compact floating bar opens a bottom sheet for cart review before checkout
+- Add-to-cart shows a brief toast confirmation
+
+### Static Images
+
+Restaurant and menu `imageUrl` values point to SVG assets in `frontend/public/images/`, generated via `npm run generate:images` and seeded by `npm run seed`.
 
 ## Deployment Topology (Production)
 

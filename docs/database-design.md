@@ -15,65 +15,67 @@ erDiagram
 
     USERS {
         uuid id PK
-        varchar email UK
-        varchar password
-        varchar name
-        enum role
-        varchar phone
-        timestamp createdAt
-        timestamp updatedAt
+        string email UK
+        string password
+        string name
+        string role
+        string phone
+        datetime createdAt
+        datetime updatedAt
     }
 
     RESTAURANTS {
         uuid id PK
-        varchar name
-        varchar description
-        varchar cuisine
-        varchar address
-        varchar phone
-        varchar imageUrl
+        string name
+        string description
+        string cuisine
+        string address
+        string phone
+        string imageUrl
         boolean isOpen
-        decimal rating
-        uuid ownerId FK UK
-        timestamp createdAt
-        timestamp updatedAt
+        float rating
+        uuid ownerId UK
+        datetime createdAt
+        datetime updatedAt
     }
 
     MENU_ITEMS {
         uuid id PK
-        varchar name
-        varchar description
-        decimal price
-        varchar category
-        varchar imageUrl
+        string name
+        string description
+        float price
+        string category
+        string imageUrl
         boolean isAvailable
         uuid restaurantId FK
-        timestamp createdAt
-        timestamp updatedAt
+        datetime createdAt
+        datetime updatedAt
     }
 
     ORDERS {
         uuid id PK
-        enum status
-        decimal totalAmount
-        varchar deliveryAddress
-        varchar notes
+        string status
+        float totalAmount
+        string deliveryAddress
+        string notes
         uuid userId FK
         uuid restaurantId FK
-        timestamp createdAt
-        timestamp updatedAt
+        datetime createdAt
+        datetime updatedAt
     }
 
     ORDER_ITEMS {
         uuid id PK
-        integer quantity
-        decimal unitPrice
-        decimal subtotal
-        varchar menuItemName
+        int quantity
+        float unitPrice
+        float subtotal
+        string menuItemName
         uuid orderId FK
         uuid menuItemId FK
     }
 ```
+
+> **Note:** Mermaid `erDiagram` allows only one key per attribute (`PK`, `FK`, or `UK`). `ownerId` is both a foreign key and unique — shown as `UK` above; see the `restaurants` table for full constraints.
 
 ## Tables
 
@@ -218,15 +220,43 @@ In development (`NODE_ENV=development`), TypeORM `synchronize: true` auto-create
 
 ## Seed Data
 
-The seed script (`npm run seed`) creates demo accounts:
+The seed script (`npm run seed`) is idempotent — it creates missing records and updates image URLs on existing ones.
+
+**Demo accounts** (all restaurant owners use password `rest123`):
 
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | `admin@foodrush.com` | `admin123` |
 | Restaurant | `restaurant@foodrush.com` | `rest123` |
+| Restaurant | `wok@foodrush.com` | `rest123` |
+| Restaurant | `napoli@foodrush.com` | `rest123` |
+| Restaurant | `burger@foodrush.com` | `rest123` |
+| Restaurant | `spice@foodrush.com` | `rest123` |
+| Restaurant | `taco@foodrush.com` | `rest123` |
 | Customer | `customer@foodrush.com` | `cust123` |
+| Customer | `sara@foodrush.com` | `cust123` |
+| Customer | `hassan@foodrush.com` | `cust123` |
+| Customer | `fatima@foodrush.com` | `cust123` |
 
-Also seeds **Biryani House** restaurant with six Pakistani menu items.
+**Restaurants seeded** (6 total, 33 menu items):
+
+| Restaurant | Cuisine | Image path |
+|------------|---------|------------|
+| Biryani House | Pakistani | `/images/restaurants/biryani-house.svg` |
+| Dragon Wok | Chinese | `/images/restaurants/dragon-wok.svg` |
+| Napoli Kitchen | Italian | `/images/restaurants/napoli-kitchen.svg` |
+| Burger Forge | Fast Food | `/images/restaurants/burger-forge.svg` |
+| Spice Route | Indian | `/images/restaurants/spice-route.svg` |
+| Taco Fiesta | Mexican | `/images/restaurants/taco-fiesta.svg` |
+
+Seed data definitions: `backend/src/seed-data.ts`. Menu images use `/images/menus/<slug>.svg` paths served from the Next.js `public/` folder.
+
+Regenerate SVG assets:
+
+```bash
+cd frontend
+npm run generate:images
+```
 
 ## Query Patterns
 

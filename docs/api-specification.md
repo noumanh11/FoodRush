@@ -4,6 +4,34 @@ Base URL: `http://localhost:3001/api`
 
 All authenticated endpoints require a valid JWT in the `access_token` HTTP-only cookie (set automatically on login/register) or as `Authorization: Bearer <token>`.
 
+## Health Check
+
+```
+GET /
+```
+
+**Auth:** None
+
+**Response `200`:**
+
+```json
+{
+  "status": "ok",
+  "message": "FoodRush API is running",
+  "version": "1.0.0",
+  "endpoints": {
+    "auth": "/api/auth",
+    "restaurants": "/api/restaurants",
+    "orders": "/api/orders",
+    "chatbot": "/api/chatbot"
+  }
+}
+```
+
+> The global API prefix is `/api`, so the full URL is `GET http://localhost:3001/api`.
+
+---
+
 ## Authentication
 
 ### Register
@@ -146,11 +174,11 @@ GET /restaurants
   {
     "id": "uuid",
     "name": "Biryani House",
-    "description": "Best biryani in town",
+    "description": "Authentic Karachi-style biryani and karahi",
     "cuisine": "Pakistani",
-    "address": "Karachi",
-    "phone": "+92 300 0000000",
-    "imageUrl": null,
+    "address": "Clifton Block 5, Karachi",
+    "phone": "+92 21 35871234",
+    "imageUrl": "/images/restaurants/biryani-house.svg",
     "isOpen": true,
     "rating": null,
     "ownerId": "uuid",
@@ -205,7 +233,7 @@ POST /restaurants
   "cuisine": "Fast Food",
   "address": "123 Main St",
   "phone": "+92 300 1111111",
-  "imageUrl": "https://example.com/image.jpg"
+  "imageUrl": "/images/restaurants/biryani-house.svg"
 }
 ```
 
@@ -216,7 +244,7 @@ POST /restaurants
 | `cuisine` | string | No |
 | `address` | string | No |
 | `phone` | string | No |
-| `imageUrl` | string | No |
+| `imageUrl` | string | No | Path or URL to cover image (seed uses `/images/restaurants/*.svg`) |
 
 **Response `201`:** Created restaurant object.
 
@@ -256,7 +284,7 @@ GET /restaurants/:restaurantId/menu
     "description": "Fragrant basmati rice",
     "price": "350.00",
     "category": "Rice",
-    "imageUrl": null,
+    "imageUrl": "/images/menus/chicken-biryani.svg",
     "isAvailable": true,
     "restaurantId": "uuid",
     "createdAt": "...",
@@ -283,7 +311,7 @@ POST /restaurants/:restaurantId/menu
   "description": "Fragrant basmati rice",
   "price": 350,
   "category": "Rice",
-  "imageUrl": "https://example.com/biryani.jpg",
+  "imageUrl": "/images/menus/chicken-biryani.svg",
   "isAvailable": true
 }
 ```
@@ -294,7 +322,7 @@ POST /restaurants/:restaurantId/menu
 | `price` | number | Yes |
 | `description` | string | No |
 | `category` | string | No |
-| `imageUrl` | string | No |
+| `imageUrl` | string | No | Path or URL to cover image (seed uses `/images/restaurants/*.svg`) |
 | `isAvailable` | boolean | No (default: true) |
 
 **Response `201`:** Created menu item.
@@ -530,6 +558,7 @@ All errors follow NestJS standard format:
 
 | Method | Path | Auth | Role |
 |--------|------|------|------|
+| GET | `/` | No | — |
 | POST | `/auth/register` | No | — |
 | POST | `/auth/login` | No | — |
 | POST | `/auth/logout` | Yes | Any |

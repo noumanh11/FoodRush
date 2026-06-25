@@ -16,6 +16,7 @@ Use this checklist to verify all MVP functionality before submission or deployme
 
 - [ ] Customer can register with email, password, and name
 - [ ] Restaurant owner can register with role `restaurant`
+- [ ] Register tab does not distort auth page layout (split panel stays fixed on desktop)
 - [ ] Duplicate email returns error
 - [ ] Password under 6 characters is rejected
 - [ ] Invalid email format is rejected
@@ -45,21 +46,26 @@ Use this checklist to verify all MVP functionality before submission or deployme
 
 ### Browse Restaurants
 
-- [ ] Home page lists all restaurants
+- [ ] Home page lists all restaurants (6 when seeded)
 - [ ] Search filters by name and cuisine
+- [ ] Restaurant cards show cover images from `/images/restaurants/`
 - [ ] Restaurant cards link to detail page
 - [ ] Empty state shown when no results
 
 ### Restaurant Details
 
-- [ ] Restaurant info displays (name, cuisine, address)
-- [ ] Menu items load and display with prices
+- [ ] Restaurant info displays (name, cuisine, address, cover image)
+- [ ] Menu items load with images from `/images/menus/`
+- [ ] Menu items display with prices
 - [ ] Unavailable items are marked or hidden appropriately
 - [ ] Add to cart works for available items
+- [ ] Add-to-cart toast appears
+- [ ] Desktop cart sidebar appears only after adding items
+- [ ] Mobile floating cart bar opens bottom sheet for review
 
 ### Cart
 
-- [ ] Cart shows added items with quantities
+- [ ] Cart shows added items with quantities and images
 - [ ] Quantity increase/decrease works
 - [ ] Remove item works
 - [ ] Total price calculates correctly
