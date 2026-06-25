@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Chicken Karahi">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="50%">
+      <stop offset="0%" stop-color="#ea580c" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" rx="24" fill="url(#bg)"/>
+  <rect width="400" height="400" rx="24" fill="url(#glow)"/>
+  <rect x="16" y="16" width="368" height="368" rx="20" fill="none" stroke="#ea580c" stroke-opacity="0.25" stroke-width="2"/>
+  <text x="200" y="195" text-anchor="middle" font-size="96">🍲</text>
+  <text x="200" y="300" text-anchor="middle" fill="#f1f5f9" font-family="system-ui,sans-serif" font-size="22" font-weight="600">Chicken Karahi</text>
+  <circle cx="200" cy="340" r="4" fill="#ea580c"/>
+</svg>

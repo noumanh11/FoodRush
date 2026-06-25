@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Napoli Kitchen">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <rect width="600" height="400" fill="url(#glow)"/>
+  <circle cx="300" cy="155" r="88" fill="#22c55e" fill-opacity="0.12" stroke="#22c55e" stroke-opacity="0.35" stroke-width="2"/>
+  <text x="300" y="175" text-anchor="middle" font-size="72">🍝</text>
+  <text x="300" y="290" text-anchor="middle" fill="#f8fafc" font-family="system-ui,sans-serif" font-size="28" font-weight="700">Napoli Kitchen</text>
+  <text x="300" y="325" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="14" letter-spacing="4">FOODRUSH</text>
+  <rect x="40" y="360" width="520" height="4" rx="2" fill="#22c55e" fill-opacity="0.6"/>
+</svg>
