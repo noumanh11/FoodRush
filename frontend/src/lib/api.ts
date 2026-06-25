@@ -1,18 +1,27 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
 
+function formatApiError(error: unknown): string {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error ? error.message : 'Something went wrong';
+  }
+
+  if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+    return 'Cannot reach the server. Start the backend with: cd backend && npm run start:dev';
+  }
+
+  const message = error.response?.data?.message ?? error.message ?? 'Something went wrong';
+  return Array.isArray(message) ? message[0] : String(message);
+}
+
 api.interceptors.response.use(
   (res) => res,
-  (error) => {
-    const message =
-      error.response?.data?.message || error.message || 'Something went wrong';
-    return Promise.reject(new Error(Array.isArray(message) ? message[0] : message));
-  },
+  (error) => Promise.reject(new Error(formatApiError(error))),
 );
 
 export default api;

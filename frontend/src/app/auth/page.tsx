@@ -48,7 +48,13 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await register({ ...form, role });
+      await register({
+        email: form.email,
+        password: form.password,
+        name: form.name,
+        role,
+        phone: form.phone.trim() || undefined,
+      });
       toast.success('Account created!');
       redirectAfterAuth(role);
     } catch (err: any) {
