@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Trash2, Plus, Minus, MapPin, FileText, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, MapPin, FileText, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '@/context/useCart';
 import { useAuth } from '@/context/useAuth';
 import { ordersApi } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+
+const DEFAULT_MENU_IMAGE = '/images/menus/default.svg';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, total, restaurantId } = useCart();
@@ -28,7 +30,7 @@ export default function CartPage() {
 
   if (authLoading || !user || user.role !== 'user') {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-slate-950">
         <Navbar />
       </div>
     );
@@ -36,13 +38,18 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-mesh pointer-events-none opacity-30" />
         <Navbar />
-        <div className="max-w-lg mx-auto text-center py-24 px-4">
-          <ShoppingCart size={56} className="mx-auto mb-4 text-slate-700" />
-          <h2 className="font-display text-2xl font-bold text-white mb-2">Your cart is empty</h2>
-          <p className="text-slate-400 mb-6">Add items from a restaurant to get started</p>
-          <Link href="/" className="btn-primary inline-flex">Browse Restaurants</Link>
+        <div className="max-w-lg mx-auto text-center py-32 px-4 relative z-10">
+          <div className="w-24 h-24 bg-slate-900/80 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-slate-900/20 border border-slate-800">
+            <ShoppingCart size={40} className="text-slate-600" />
+          </div>
+          <h2 className="font-display text-3xl font-bold text-white mb-3">Your cart is empty</h2>
+          <p className="text-slate-400 mb-8 text-lg">Looks like you haven't added anything delicious yet.</p>
+          <Link href="/" className="btn-primary inline-flex items-center gap-2 group px-8 py-3.5 text-lg shadow-brand-500/25 shadow-xl hover:shadow-brand-500/40">
+            Browse Restaurants <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
     );
@@ -75,121 +82,169 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-950 relative">
+      <div className="absolute inset-0 bg-mesh pointer-events-none opacity-20" />
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm mb-6 transition-colors">
-          <ArrowLeft size={15} /> Continue Shopping
+      
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12 relative z-10">
+        <Link href={`/restaurants/${restaurantId}`} className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm mb-6 transition-colors group">
+          <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" /> Continue Shopping
         </Link>
 
-        <h1 className="font-display text-3xl font-bold text-white mb-8">Checkout</h1>
+        <h1 className="font-display text-4xl font-bold text-white mb-8">Checkout</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Cart items */}
-          <div className="lg:col-span-3 space-y-3">
-            <h2 className="font-semibold text-slate-300 text-sm uppercase tracking-wider mb-3">
-              Order Items
-            </h2>
-            {items.map((cartItem) => (
-              <div key={cartItem.menuItem.id} className="card p-4 flex items-center gap-4">
-                {cartItem.menuItem.imageUrl && (
-                  <img src={cartItem.menuItem.imageUrl} alt={cartItem.menuItem.name}
-                    className="w-16 h-16 rounded-xl object-cover shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-white truncate">{cartItem.menuItem.name}</h3>
-                  <p className="text-brand-400 font-bold">
-                    PKR {Number(cartItem.menuItem.price).toLocaleString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => updateQuantity(cartItem.menuItem.id, cartItem.quantity - 1)}
-                    className="w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-                  >
-                    <Minus size={13} />
-                  </button>
-                  <span className="w-6 text-center font-bold text-white">{cartItem.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(cartItem.menuItem.id, cartItem.quantity + 1)}
-                    className="w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-                  >
-                    <Plus size={13} />
-                  </button>
-                  <button
-                    onClick={() => removeItem(cartItem.menuItem.id)}
-                    className="w-8 h-8 flex items-center justify-center text-red-400 hover:bg-red-500/10 rounded-lg transition-colors ml-1"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-                <span className="text-slate-300 font-semibold w-24 text-right shrink-0">
-                  PKR {(Number(cartItem.menuItem.price) * cartItem.quantity).toLocaleString()}
-                </span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Cart Items */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="glass-card p-6 border-slate-700/50">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                <h2 className="font-semibold text-white text-lg">
+                  Order Items <span className="ml-2 px-2.5 py-0.5 rounded-full bg-slate-800 text-brand-400 text-sm">{items.length}</span>
+                </h2>
+                <button
+                  onClick={clearCart}
+                  className="text-sm text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1"
+                >
+                  <Trash2 size={14} /> Clear all
+                </button>
               </div>
-            ))}
+
+              <div className="space-y-4">
+                {items.map((cartItem) => (
+                  <div key={cartItem.menuItem.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-slate-600 transition-colors group">
+                    <img
+                      src={cartItem.menuItem.imageUrl || DEFAULT_MENU_IMAGE}
+                      alt={cartItem.menuItem.name}
+                      className="w-20 h-20 rounded-xl object-cover shrink-0 shadow-lg bg-slate-900"
+                    />
+                    
+                    <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
+                      <div className="flex justify-between items-start gap-4">
+                        <h3 className="font-semibold text-white truncate text-lg">{cartItem.menuItem.name}</h3>
+                        <button
+                          onClick={() => removeItem(cartItem.menuItem.id)}
+                          className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1.5 bg-slate-900 rounded-lg p-1 border border-slate-700">
+                          <button
+                            onClick={() => updateQuantity(cartItem.menuItem.id, cartItem.quantity - 1)}
+                            className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded-md transition-colors"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="w-8 text-center font-bold text-white text-sm">{cartItem.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(cartItem.menuItem.id, cartItem.quantity + 1)}
+                            className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded-md transition-colors"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        
+                        <div className="text-right">
+                          <span className="text-brand-400 font-bold text-lg">
+                            PKR {(Number(cartItem.menuItem.price) * cartItem.quantity).toLocaleString()}
+                          </span>
+                          <p className="text-slate-500 text-xs">PKR {Number(cartItem.menuItem.price).toLocaleString()} each</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Summary + details */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* Right Column: Summary + Details */}
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+            
             {/* Delivery details */}
-            <div className="card p-5 space-y-4">
-              <h2 className="font-semibold text-white">Delivery Details</h2>
-              <div>
-                <label className="label flex items-center gap-1.5">
-                  <MapPin size={13} /> Delivery Address
-                </label>
-                <textarea
-                  rows={2}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Enter your full delivery address"
-                  className="input resize-none"
-                />
-              </div>
-              <div>
-                <label className="label flex items-center gap-1.5">
-                  <FileText size={13} /> Special Instructions <span className="text-slate-600 ml-1">(optional)</span>
-                </label>
-                <textarea
-                  rows={2}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="E.g. no onions, extra sauce…"
-                  className="input resize-none"
-                />
+            <div className="glass-card p-6 border-slate-700/50">
+              <h2 className="font-semibold text-white text-lg mb-4 flex items-center gap-2">
+                <MapPin size={18} className="text-brand-400" /> Delivery Details
+              </h2>
+              <div className="space-y-5">
+                <div>
+                  <label className="label text-slate-300">Delivery Address</label>
+                  <textarea
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter your full delivery address (e.g., House #, Street, Block...)"
+                    className="input resize-none bg-slate-900/80 focus:bg-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="label text-slate-300 flex justify-between items-center">
+                    <span>Special Instructions</span>
+                    <span className="text-xs text-slate-500 font-normal">Optional</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="E.g. no onions, extra sauce, call upon arrival..."
+                    className="input resize-none bg-slate-900/80 focus:bg-slate-900"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Order summary */}
-            <div className="card p-5">
-              <h2 className="font-semibold text-white mb-4">Order Summary</h2>
-              <div className="space-y-2 text-sm text-slate-400 mb-4">
+            <div className="glass-card p-6 border-brand-500/30 shadow-xl shadow-brand-500/5 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-amber-400" />
+              
+              <h2 className="font-semibold text-white text-lg mb-5">Order Summary</h2>
+              
+              <div className="space-y-3 text-sm text-slate-300 mb-6 max-h-48 overflow-y-auto scrollbar-hide pr-2">
                 {items.map((i) => (
-                  <div key={i.menuItem.id} className="flex justify-between">
-                    <span>{i.menuItem.name} × {i.quantity}</span>
-                    <span>PKR {(Number(i.menuItem.price) * i.quantity).toLocaleString()}</span>
+                  <div key={i.menuItem.id} className="flex justify-between items-center">
+                    <span className="truncate pr-4 flex-1">{i.quantity}x {i.menuItem.name}</span>
+                    <span className="shrink-0 font-medium">PKR {(Number(i.menuItem.price) * i.quantity).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-slate-700 pt-3 flex justify-between font-bold text-white text-lg">
-                <span>Total</span>
-                <span className="text-brand-400">PKR {total.toLocaleString()}</span>
+              
+              <div className="space-y-3 border-t border-slate-700/80 pt-4 mb-6">
+                <div className="flex justify-between text-slate-400 text-sm">
+                  <span>Subtotal</span>
+                  <span>PKR {total.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-slate-400 text-sm">
+                  <span>Delivery Fee</span>
+                  <span className="text-emerald-400 font-medium">Free</span>
+                </div>
+                <div className="flex justify-between font-bold text-white text-xl pt-2 border-t border-slate-700/80 mt-2">
+                  <span>Total</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-amber-400">
+                    PKR {total.toLocaleString()}
+                  </span>
+                </div>
               </div>
+
               <button
                 onClick={handlePlaceOrder}
                 disabled={loading}
-                className="btn-primary w-full mt-5"
+                className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-2 group shadow-lg shadow-brand-500/20"
               >
-                {loading ? 'Placing Order…' : 'Place Order'}
+                {loading ? 'Processing...' : (
+                  <>
+                    Confirm Order <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
               </button>
-              <button
-                onClick={clearCart}
-                className="w-full mt-2 text-sm text-slate-500 hover:text-red-400 transition-colors py-1"
-              >
-                Clear Cart
-              </button>
+              
+              <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+                <ShieldCheck size={14} className="text-emerald-500" />
+                <span>Secure checkout powered by FoodRush</span>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
