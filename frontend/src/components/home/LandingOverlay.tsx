@@ -10,14 +10,20 @@ export default function LandingOverlay({ onComplete }: { onComplete: () => void 
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setExiting(true), 2200);
+    // Disable body scrollbar during landing animation to prevent vertical scrolling
+    document.body.style.overflow = 'hidden';
+
+    const timer = setTimeout(() => setExiting(true), 400);
     const hideTimer = setTimeout(() => {
       setVisible(false);
       onComplete();
-    }, 3000);
+      document.body.style.overflow = '';
+    }, 1200);
+
     return () => {
       clearTimeout(timer);
       clearTimeout(hideTimer);
+      document.body.style.overflow = '';
     };
   }, [onComplete]);
 

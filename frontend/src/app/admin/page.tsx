@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Store, X, Clock } from 'lucide-react';
+import { ShoppingBag, Store, X, Clock, DollarSign, ChevronRight } from 'lucide-react';
 import { Order } from '@/types';
 import { ordersApi } from '@/lib/api';
 import { useAuth } from '@/context/useAuth';
@@ -54,68 +54,104 @@ export default function AdminPage() {
     }
   };
 
-  if (authLoading || loading) return <div className="min-h-screen"><Navbar /><PageLoader /></div>;
+  if (authLoading || loading) return <div className="min-h-screen bg-slate-950"><Navbar /><PageLoader /></div>;
 
   const activeOrders = orders.filter((o) => !['delivered', 'cancelled'].includes(o.status));
   const pastOrders = orders.filter((o) => ['delivered', 'cancelled'].includes(o.status));
+  const platformRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + Number(o.totalAmount), 0);
+
+  const stats = [
+    { label: 'Active Orders', value: activeOrders.length, icon: Clock, color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20' },
+    { label: 'Total Revenue', value: `PKR ${platformRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20' },
+    { label: 'Delivered Orders', value: orders.filter((o) => o.status === 'delivered').length, icon: ShoppingBag, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
+    { label: 'Cancelled Orders', value: orders.filter((o) => o.status === 'cancelled').length, icon: X, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+  ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-950 bg-mesh pb-12">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-slate-400 text-sm mt-1">Platform overview & order management</p>
-          </div>
-          <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2">
-            <ShoppingBag size={16} className="text-brand-400" />
-            <span className="text-sm text-slate-300">{orders.length} total orders</span>
+        
+        {/* Header Section */}
+        <div className="glass-card p-6 rounded-3xl mb-8 border-brand-500/20 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 to-amber-500" />
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
+                <Store size={32} className="text-brand-400" />
+              </div>
+              <div>
+                <h1 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">Admin Dashboard</h1>
+                <p className="text-slate-400 text-sm sm:text-base mt-1 flex items-center gap-2">
+                  Platform Overview & Order Management
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-2.5 flex items-center gap-2">
+              <ShoppingBag size={18} className="text-brand-400" />
+              <span className="text-sm font-semibold text-slate-300">{orders.length} total orders</span>
+            </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {[
-            { label: 'Active Orders', value: activeOrders.length, color: 'text-amber-400' },
-            { label: 'Delivered', value: orders.filter((o) => o.status === 'delivered').length, color: 'text-emerald-400' },
-            { label: 'Cancelled', value: orders.filter((o) => o.status === 'cancelled').length, color: 'text-red-400' },
-          ].map((s) => (
-            <div key={s.label} className="card p-4 text-center">
-              <p className={`text-3xl font-display font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-slate-500 text-sm mt-1">{s.label}</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {stats.map((s) => (
+            <div key={s.label} className={`glass-card p-5 border ${s.border} hover:-translate-y-1 transition-transform duration-300`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className={`p-3 rounded-xl ${s.bg}`}>
+                  <s.icon size={20} className={s.color} />
+                </div>
+              </div>
+              <div>
+                <p className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{s.value}</p>
+                <p className="text-slate-400 text-sm font-medium">{s.label}</p>
+              </div>
             </div>
           ))}
         </div>
 
         {orders.length === 0 ? (
-          <div className="text-center py-16 text-slate-500">
-            <Store size={40} className="mx-auto mb-3 opacity-30" />
-            <p>No orders in the system yet</p>
+          <div className="glass-card text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl">
+            <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Store size={32} className="text-slate-600" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">No orders in system</h3>
+            <p className="text-slate-500">Active and past orders will show up here.</p>
           </div>
         ) : (
-          <>
+          <div className="space-y-8">
             {activeOrders.length > 0 && (
-              <>
-                <h2 className="font-semibold text-white text-sm uppercase tracking-wider mb-3">Active Orders</h2>
-                <div className="space-y-3 mb-8">
+              <div className="animate-fade-in-up">
+                <h2 className="font-semibold text-white flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  Active Orders
+                </h2>
+                <div className="space-y-4">
                   {activeOrders.map((order) => (
                     <OrderRow key={order.id} order={order} onCancel={() => handleCancelOrder(order.id)} />
                   ))}
                 </div>
-              </>
+              </div>
             )}
+            
             {pastOrders.length > 0 && (
-              <>
-                <h2 className="font-semibold text-slate-500 text-sm uppercase tracking-wider mb-3">Past Orders</h2>
-                <div className="space-y-3">
+              <div className="animate-fade-in-up">
+                <h2 className="font-semibold text-slate-400 flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-slate-600" />
+                  Past Orders
+                </h2>
+                <div className="space-y-4 opacity-80 hover:opacity-100 transition-opacity">
                   {pastOrders.map((order) => (
-                    <OrderRow key={order.id} order={order} onCancel={undefined} />
+                    <OrderRow key={order.id} order={order} />
                   ))}
                 </div>
-              </>
+              </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -124,32 +160,56 @@ export default function AdminPage() {
 
 function OrderRow({ order, onCancel }: { order: Order; onCancel?: () => void }) {
   return (
-    <div className="card p-4 flex items-center gap-4">
-      <div className="w-10 h-10 bg-brand-500/10 rounded-xl flex items-center justify-center shrink-0">
-        <ShoppingBag size={18} className="text-brand-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-semibold text-white text-sm">{order.restaurant?.name || 'Restaurant'}</span>
-          <StatusBadge status={order.status} />
+    <div className="glass-card p-5 border border-slate-800/80 hover:border-slate-700/80 transition-colors shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-2xl flex items-center justify-center shrink-0">
+          <ShoppingBag size={22} className="text-brand-400" />
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span>{order.user?.name || 'Unknown'}</span>
-          <span>•</span>
-          <span>{order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
-          <span>•</span>
-          <span>PKR {Number(order.totalAmount).toLocaleString()}</span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <Clock size={10} />
-            {new Date(order.createdAt).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
-          </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+            <span className="font-mono text-xs font-bold text-slate-400 bg-slate-850 px-2 py-0.5 rounded border border-slate-700">
+              #{order.id.slice(0, 6).toUpperCase()}
+            </span>
+            <span className="font-semibold text-white text-base">
+              {order.restaurant?.name || 'Restaurant'}
+            </span>
+            <StatusBadge status={order.status} />
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400 font-medium">
+            <span className="text-slate-300">Customer: {order.user?.name || 'Unknown'}</span>
+            <span className="text-slate-600">•</span>
+            <span>{order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-emerald-400 font-semibold">PKR {Number(order.totalAmount).toLocaleString()}</span>
+            <span className="text-slate-600">•</span>
+            <span className="flex items-center gap-1.5 text-slate-500">
+              <Clock size={12} />
+              {new Date(order.createdAt).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}
+            </span>
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {order.items.map((item, idx) => (
+              <span key={idx} className="inline-flex text-[11px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-md">
+                <span className="text-brand-400 font-bold mr-1">{item.quantity}x</span>
+                {item.menuItemName}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
+
       {onCancel && !['delivered', 'cancelled'].includes(order.status) && (
-        <button onClick={onCancel} className="btn-ghost p-2 text-red-400 hover:text-red-300">
-          <X size={16} />
-        </button>
+        <div className="flex md:self-center self-end">
+          <button
+            onClick={onCancel}
+            className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/40 rounded-xl text-xs font-semibold transition-all duration-300"
+          >
+            <X size={14} />
+            Cancel Order
+          </button>
+        </div>
       )}
     </div>
   );

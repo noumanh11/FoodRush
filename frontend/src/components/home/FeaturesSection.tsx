@@ -60,33 +60,33 @@ const STATS = [
 
 export default function FeaturesSection() {
   return (
-    <section className="mb-14">
-      <div className="text-center mb-10 animate-fade-in-up">
-        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-4">
-          <span>🌟</span> Why FoodRush?
+    <section className="mb-24">
+      <div className="text-center mb-16 animate-fade-in-up">
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-semibold mb-6">
+          <span className="animate-pulse">🌟</span> Why FoodRush?
         </span>
-        <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-3">
+        <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-white mb-6 tracking-tight">
           Everything you need to{' '}
-          <span className="text-gradient">order smarter</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-amber-300">order smarter</span>
         </h2>
-        <p className="text-slate-400 max-w-2xl mx-auto text-sm sm:text-base">
-          From browsing to delivery — enjoy a delightful experience with icons, visuals, and tools built for food lovers. 🎉
+        <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
+          From browsing to delivery — enjoy a seamless experience built for true food lovers.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
         {STATS.map((stat, i) => (
           <div
             key={stat.label}
-            className={`glass-card p-4 flex items-center gap-3 animate-fade-in-up ${['stagger-1', 'stagger-2', 'stagger-3'][i]}`}
+            className={`glass-card p-6 flex items-center gap-4 animate-fade-in-up ${['stagger-1', 'stagger-2', 'stagger-3'][i]} hover:-translate-y-1 transition-transform duration-300`}
           >
-            <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl animate-bounce-soft" style={{ animationDelay: `${i * 0.2}s` }}>
+            <div className="w-14 h-14 rounded-2xl bg-slate-800/80 flex items-center justify-center text-2xl shadow-inner border border-slate-700/50" style={{ animationDelay: `${i * 0.2}s` }}>
               {stat.emoji}
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider">{stat.label}</p>
-              <p className="font-display font-bold text-white flex items-center gap-1.5">
-                <stat.icon size={14} className="text-brand-400" />
+              <p className="text-sm text-slate-500 uppercase tracking-widest font-medium mb-1">{stat.label}</p>
+              <p className="font-display text-xl font-bold text-white flex items-center gap-2">
+                <stat.icon size={18} className="text-brand-400" />
                 {stat.value}
               </p>
             </div>
@@ -94,29 +94,31 @@ export default function FeaturesSection() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {FEATURES.map((feature) => (
           <div
             key={feature.title}
-            className={`group card food-card-hover overflow-hidden animate-fade-in-up ${feature.delay}`}
+            className={`group glass-card overflow-hidden animate-fade-in-up ${feature.delay} hover:border-brand-500/30 transition-all duration-500`}
           >
-            <div className="relative h-44 overflow-hidden">
+            <div className="relative h-56 overflow-hidden">
               <img
                 src={feature.image}
                 alt={feature.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-              <div className={`absolute top-3 left-3 w-10 h-10 rounded-xl bg-gradient-to-br ${feature.color} backdrop-blur-sm border border-white/10 flex items-center justify-center`}>
-                <feature.icon size={20} className={feature.iconColor} />
+              <div className={`absolute top-4 left-4 w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.color} backdrop-blur-md border border-white/10 flex items-center justify-center shadow-xl`}>
+                <feature.icon size={24} className={feature.iconColor} />
               </div>
-              <span className="absolute top-3 right-3 text-2xl animate-float-slow">{feature.emoji}</span>
             </div>
-            <div className="p-5">
-              <h3 className="font-display font-bold text-lg text-white mb-2 group-hover:text-brand-400 transition-colors">
+            <div className="p-6 relative">
+              <div className="absolute -top-12 right-6 w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center text-3xl shadow-xl shadow-black/50 rotate-3 group-hover:-rotate-3 transition-transform duration-500">
+                {feature.emoji}
+              </div>
+              <h3 className="font-display text-2xl font-bold text-white mb-3 group-hover:text-brand-400 transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+              <p className="text-slate-400 text-base leading-relaxed">{feature.description}</p>
             </div>
           </div>
         ))}
