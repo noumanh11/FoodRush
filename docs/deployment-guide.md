@@ -97,8 +97,11 @@ cp .env.example .env.local
 ```
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_URL=/api
+BACKEND_URL=http://localhost:3001
 ```
+
+`NEXT_PUBLIC_API_URL=/api` routes browser requests through the Next.js dev proxy to the backend (avoids CORS and cookie issues). `BACKEND_URL` is the proxy target used by `next.config.mjs`.
 
 Install and start:
 
@@ -231,7 +234,8 @@ Set `NEXT_PUBLIC_API_URL` to your production API URL (e.g. `https://api.foodrush
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Yes | Backend API base URL |
+| `NEXT_PUBLIC_API_URL` | Yes | API base URL (`/api` with Next.js proxy, or full URL in production) |
+| `BACKEND_URL` | No | Proxy target for `/api` rewrites (default: `http://localhost:3001`) |
 
 ### PostgreSQL in Production
 
@@ -320,8 +324,9 @@ pm2 start npm --name foodrush-web -- start
 | Chatbot errors | Verify `GROQ_API_KEY` is set and valid |
 | Migration failures | Ensure DB is empty or run `migration:run` on clean DB |
 | Port in use | Change `PORT` in backend `.env` or stop conflicting process |
+| Cannot connect / Network Error on login | Ensure backend is running (`npm run start:dev` in `backend/`); frontend proxies `/api` to `BACKEND_URL` |
 | Next.js chunk/cache errors | Run `npm run dev:clean` in `frontend/`; use only one dev server |
-| `Cannot GET /api` in browser | Use `GET /api` on port **3001** (backend), not port 3000 (frontend) |
+| `Cannot GET /api` in browser | `GET /api` on port 3000 is proxied to the backend; direct backend URL is port **3001** |
 
 ## Related Documentation
 

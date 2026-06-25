@@ -56,6 +56,8 @@ npm install
 npm run dev
 ```
 
+API requests are proxied through Next.js (`/api` → backend on port 3001), so login and cookies work on the same origin.
+
 Open [http://localhost:3000](http://localhost:3000).
 
 If you see chunk or cache errors after switching between `build` and `dev`:
