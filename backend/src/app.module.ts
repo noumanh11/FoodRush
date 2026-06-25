@@ -7,6 +7,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 import { MenusModule } from './menus/menus.module';
 import { OrdersModule } from './orders/orders.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { AppController } from './app.controller';
 import { User } from './users/user.entity';
 import { Restaurant } from './restaurants/restaurant.entity';
 import { MenuItem } from './restaurants/menu-item.entity';
@@ -40,5 +41,6 @@ import { OrderItem } from './orders/order-item.entity';
     OrdersModule,
     ChatbotModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

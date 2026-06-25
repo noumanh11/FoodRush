@@ -1,19 +1,37 @@
 import { NestFactory } from '@nestjs/core';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { AppModule } from './app.module';
 import { UsersService } from './users/users.service';
 import { RestaurantsService } from './restaurants/restaurants.service';
 import { MenusService } from './menus/menus.service';
-import { UserRole } from './users/user.entity';
+import { User, UserRole } from './users/user.entity';
+import { Restaurant } from './restaurants/restaurant.entity';
+import { MenuItem } from './restaurants/menu-item.entity';
+import { CUSTOMERS, RESTAURANTS, IMG } from './seed-data';
 
-const RESTAURANT_EMAIL = 'restaurant@foodrush.com';
-const MENU_ITEMS = [
-  { name: 'Chicken Biryani', price: 350, category: 'Rice', description: 'Fragrant basmati rice with tender chicken' },
-  { name: 'Beef Biryani', price: 400, category: 'Rice', description: 'Spicy beef biryani with hand-pounded spices' },
-  { name: 'Mutton Karahi', price: 650, category: 'Curry', description: 'Slow-cooked mutton in tomato gravy' },
-  { name: 'Chicken Karahi', price: 550, category: 'Curry', description: 'Classic chicken karahi with ginger' },
-  { name: 'Garlic Naan', price: 40, category: 'Bread', description: 'Tandoor-baked garlic naan' },
-  { name: 'Raita', price: 50, category: 'Sides', description: 'Yogurt with cucumber and mint' },
-];
+async function ensureUser(
+  usersService: UsersService,
+  data: { email: string; password: string; name: string; phone?: string },
+  role: UserRole,
+): Promise<User> {
+  const existing = await usersService.findByEmail(data.email);
+  if (existing) return existing;
+
+  if (role === UserRole.ADMIN) {
+    return usersService.createWithRole(
+      { email: data.email, password: data.password, name: data.name, phone: data.phone },
+      UserRole.ADMIN,
+    );
+  }
+
+  return usersService.create({
+    email: data.email,
+    password: data.password,
+    name: data.name,
+    phone: data.phone,
+    role,
+  });
+}
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -21,99 +39,100 @@ async function bootstrap() {
   const usersService = app.get(UsersService);
   const restaurantsService = app.get(RestaurantsService);
   const menusService = app.get(MenusService);
+  const restaurantRepo = app.get(getRepositoryToken(Restaurant));
+  const menuRepo = app.get(getRepositoryToken(MenuItem));
 
-  const ADMIN_EMAIL = 'admin@foodrush.com';
+  // Admin
   try {
-    const admin = await usersService.createWithRole(
-      { email: ADMIN_EMAIL, password: 'admin123', name: 'Admin' },
+    const admin = await ensureUser(
+      usersService,
+      { email: 'admin@foodrush.com', password: 'admin123', name: 'Admin' },
       UserRole.ADMIN,
     );
-    console.log('✅ Admin created:', admin.email);
+    console.log('✅ Admin:', admin.email);
   } catch (e: any) {
-    const fixed = await usersService.ensureRole(ADMIN_EMAIL, UserRole.ADMIN);
-    if (fixed) {
-      console.log('✅ Admin role ensured:', fixed.email);
-    } else {
-      console.log('ℹ️ Admin:', e?.message || 'already exists');
-    }
+    const fixed = await usersService.ensureRole('admin@foodrush.com', UserRole.ADMIN);
+    console.log(fixed ? '✅ Admin role ensured' : `ℹ️ Admin: ${e?.message}`);
   }
 
-  let owner = await usersService.findByEmail(RESTAURANT_EMAIL);
-  if (!owner) {
+  // Customers
+  for (const customer of CUSTOMERS) {
     try {
-      owner = await usersService.create({
-        email: RESTAURANT_EMAIL,
-        password: 'rest123',
-        name: 'Biryani House',
-        role: UserRole.RESTAURANT,
-      });
-      console.log('✅ Restaurant owner created:', owner.email);
+      const user = await ensureUser(usersService, customer, UserRole.USER);
+      console.log('✅ Customer:', user.email);
     } catch (e: any) {
-      console.error('❌ Failed to create restaurant owner:', e?.message);
+      console.log(`ℹ️ Customer ${customer.email}:`, e?.message || 'exists');
     }
-  } else {
-    console.log('ℹ️ Restaurant owner already exists:', owner.email);
   }
 
-  try {
-    const customer = await usersService.create({
-      email: 'customer@foodrush.com',
-      password: 'cust123',
-      name: 'Ahmed',
-      role: UserRole.USER,
-    });
-    console.log('✅ Customer created:', customer.email);
-  } catch (e: any) {
-    console.log('ℹ️ Customer:', e?.message || 'already exists');
-  }
+  // Restaurants + menus
+  for (const entry of RESTAURANTS) {
+    const owner = await ensureUser(
+      usersService,
+      { ...entry.owner, phone: entry.owner.phone },
+      UserRole.RESTAURANT,
+    );
 
-  if (owner) {
     let restaurant = await restaurantsService.findByOwner(owner.id);
 
     if (!restaurant) {
-      try {
-        restaurant = await restaurantsService.create(
-          {
-            name: 'Biryani House',
-            cuisine: 'Pakistani',
-            address: 'Karachi',
-            phone: '+92 300 0000000',
-            description: 'Best biryani in town',
-          },
-          owner,
-        );
-        console.log('✅ Restaurant created:', restaurant.name);
-      } catch (e: any) {
-        console.error('❌ Failed to create restaurant:', e?.message);
-      }
+      restaurant = await restaurantsService.create(
+        {
+          ...entry.restaurant,
+          imageUrl: IMG.restaurants(entry.slug),
+        },
+        owner,
+      );
+      console.log(`✅ Restaurant created: ${restaurant.name}`);
     } else {
-      console.log('ℹ️ Restaurant already exists:', restaurant.name);
+      await restaurantRepo.update(restaurant.id, {
+        ...entry.restaurant,
+        imageUrl: IMG.restaurants(entry.slug),
+      });
+      restaurant = await restaurantsService.findOne(restaurant.id);
+      console.log(`ℹ️ Restaurant updated: ${restaurant.name}`);
     }
 
-    if (restaurant) {
-      const existingMenu = await menusService.findByRestaurant(restaurant.id);
-      const existingNames = new Set(existingMenu.map((m) => m.name));
+    const existingMenu = await menusService.findByRestaurant(restaurant.id);
+    const byName = new Map(existingMenu.map((m) => [m.name, m]));
 
-      for (const item of MENU_ITEMS) {
-        if (existingNames.has(item.name)) {
+    for (const item of entry.menu) {
+      const imageUrl = IMG.menu(item.slug);
+      const existing = byName.get(item.name);
+
+      if (existing) {
+        if (existing.imageUrl !== imageUrl) {
+          await menuRepo.update(existing.id, { imageUrl });
+          console.log(`  ↻ Image updated: ${item.name}`);
+        } else {
           console.log(`  ℹ️ Menu item exists: ${item.name}`);
-          continue;
         }
-        try {
-          await menusService.create(
-            restaurant.id,
-            { ...item, isAvailable: true },
-            owner.id,
-          );
-          console.log(`  ✅ Menu item: ${item.name}`);
-        } catch (e: any) {
-          console.log(`  ⚠️ Menu item ${item.name}:`, e?.message);
-        }
+        continue;
       }
+
+      await menusService.create(
+        restaurant.id,
+        {
+          name: item.name,
+          price: item.price,
+          category: item.category,
+          description: item.description,
+          imageUrl,
+          isAvailable: true,
+        },
+        owner.id,
+      );
+      console.log(`  ✅ Menu item: ${item.name}`);
     }
   }
 
   console.log('\n🎉 Seeding complete!');
+  console.log('\nDemo accounts:');
+  console.log('  Admin:      admin@foodrush.com / admin123');
+  console.log('  Customer:   customer@foodrush.com / cust123');
+  console.log('  Restaurant: restaurant@foodrush.com / rest123');
+  console.log('  (+ 3 more customers, 5 more restaurants — see seed-data.ts)\n');
+
   await app.close();
 }
 
