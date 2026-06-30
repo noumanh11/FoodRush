@@ -186,21 +186,30 @@ sequenceDiagram
 
 ## Chatbot Architecture
 
-The chatbot is scoped strictly to food discovery — it does not place orders or handle complaints.
+The chatbot is structured as a Persistent Retrieval-Augmented Generation (RAG) assistant named **Foodie Chef Assistant**, scoped strictly to food discovery and culinary suggestions.
 
 ```mermaid
 flowchart TD
-    UserMsg["User message"] --> Controller["ChatbotController"]
-    Controller --> ScopeCheck["Off-topic pattern check"]
+    UserMsg["User message inside Chat Session"] --> Controller["ChatbotController"]
+    Controller --> LoadSession["Load/Save Message History in DB"]
+    LoadSession --> ScopeCheck["Off-topic pattern check"]
     ScopeCheck -->|Off-topic| RejectMsg["Return redirect message"]
-    ScopeCheck -->|Food-related| LoadMenu["MenusService.findAllForChatbot()"]
-    LoadMenu --> BuildPrompt["Build system prompt with menu context"]
-    BuildPrompt --> Groq["Groq API (llama-3.1-8b-instant)"]
-    Groq -->|on failure| LocalSearch["Local menu keyword search"]
-    Groq --> Response["Food discovery reply"]
+    ScopeCheck -->|Food-related| KeywordExtract["Extract message keywords"]
+    KeywordExtract --> PreFilterRAG["Pre-Filter DB Menu Items (Top 15 matches)"]
+    PreFilterRAG --> BuildPrompt["Inject RAG Context + Dialogue History to Prompt"]
+    BuildPrompt --> Groq["Groq API (llama-3.1-8b-instant) using native global.fetch"]
+    Groq -->|Transient Error| Retry["Retry Connection (up to 2 times)"]
+    Retry -->|API Fail Fallback| LocalSearch["Local search (fuzzy matches + stemming)"]
+    Groq --> SaveResponse["Save LLM response to database"]
+    SaveResponse --> Response["Food discovery reply with dynamic title generation"]
 ```
 
-Menu data is injected into the system prompt so the AI recommends only real dishes and restaurants from the database. If `GROQ_API_KEY` is not set, the chatbot uses local keyword search against menu data (fully functional for food discovery).
+### Core Architecture Enhancements
+1. **Persistent Database History**: Conversations (`ChatConversation` entity) and messages (`ChatMessageEntity`) are persisted in PostgreSQL.
+2. **Context Pre-Filtering (RAG)**: Extracts search terms from queries and scores all menu items based on name/description matches, injecting only the top 15 most relevant candidates into the LLM context to optimize token limits.
+3. **Fuzzy Local Fallback**: If the API key is unconfigured or rate-limited, the system falls back to a local keyword search using a Levenshtein-distance typo-tolerance calculator and suffix-reduction word stemmer.
+4. **Transient Network Resiliency**: Connects to Groq using Node's native `global.fetch` to prevent legacy `node-fetch` decompressor socket drops, and retries failed calls up to 2 times automatically.
+5. **Intelligent Title Summarization**: When starting a new session, dispatches a request to the LLM to generate a clean 2–4 word title (e.g. *"Spicy Burger Craving"*) based on the user's first query.
 
 ## Frontend Architecture
 

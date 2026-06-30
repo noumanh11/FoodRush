@@ -192,19 +192,23 @@ flowchart TD
 | `orders.userId → users.id` | NO ACTION |
 | `orders.restaurantId → restaurants.id` | NO ACTION |
 | `order_items.orderId → orders.id` | CASCADE |
-| `order_items.menuItemId → menu_items.id` | NO ACTION |
+| `order_items.menuItemId → menu_items.id` | SET NULL |
+| `chat_conversations.userId → users.id` | CASCADE |
+| `chat_messages.conversationId → chat_conversations.id` | CASCADE |
 
 ## TypeORM Entities
 
 Entity files map directly to tables:
 
-| Entity | File |
-|--------|------|
-| `User` | `backend/src/users/user.entity.ts` |
-| `Restaurant` | `backend/src/restaurants/restaurant.entity.ts` |
-| `MenuItem` | `backend/src/restaurants/menu-item.entity.ts` |
-| `Order` | `backend/src/orders/order.entity.ts` |
-| `OrderItem` | `backend/src/orders/order-item.entity.ts` |
+| Entity | File | Description |
+|--------|------|-------------|
+| `User` | `backend/src/users/user.entity.ts` | Profiles for Customer, Restaurant, and Admin users |
+| `Restaurant` | `backend/src/restaurants/restaurant.entity.ts` | Restaurant metadata and merchant controls |
+| `MenuItem` | `backend/src/restaurants/menu-item.entity.ts` | Menu item selections (dishes/prices) |
+| `Order` | `backend/src/orders/order.entity.ts` | Historical records of orders |
+| `OrderItem` | `backend/src/orders/order-item.entity.ts` | Single order item details linked to orders |
+| `ChatConversation` | `backend/src/chatbot/chat-conversation.entity.ts` | Persistent chat thread descriptors |
+| `ChatMessageEntity` | `backend/src/chatbot/chat-message.entity.ts` | Historical logs of conversation dialogues |
 
 ## Migrations
 

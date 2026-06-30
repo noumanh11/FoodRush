@@ -533,6 +533,107 @@ POST /chatbot/message
 
 ---
 
+### Conversations Management API
+
+#### Get All Conversations
+```
+GET /chatbot/conversations
+```
+**Auth:** Required (Customer, Restaurant, Admin)
+
+**Response `200`:**
+```json
+[
+  {
+    "id": "a3b4c5d6...",
+    "title": "Spicy Pizza Search",
+    "userId": "u123...",
+    "createdAt": "2026-06-30T12:00:00.000Z",
+    "updatedAt": "2026-06-30T12:05:00.000Z"
+  }
+]
+```
+
+#### Create New Conversation
+```
+POST /chatbot/conversations
+```
+**Auth:** Required (Customer, Restaurant, Admin)
+
+**Response `201`:**
+```json
+{
+  "id": "b4c5d6e7...",
+  "title": "New Chat",
+  "userId": "u123...",
+  "createdAt": "2026-06-30T12:10:00.000Z",
+  "updatedAt": "2026-06-30T12:10:00.000Z"
+}
+```
+
+#### Get Conversation Messages
+```
+GET /chatbot/conversations/:id/messages
+```
+**Auth:** Required (Customer, Restaurant, Admin)
+
+**Response `200`:**
+```json
+[
+  {
+    "id": "m111...",
+    "conversationId": "b4c5d6e7...",
+    "role": "user",
+    "content": "Where is Napoli Kitchen?",
+    "createdAt": "2026-06-30T12:10:15.000Z"
+  },
+  {
+    "id": "m222...",
+    "conversationId": "b4c5d6e7...",
+    "role": "assistant",
+    "content": "Napoli Kitchen is located in...",
+    "createdAt": "2026-06-30T12:10:18.000Z"
+  }
+]
+```
+
+#### Delete Conversation
+```
+DELETE /chatbot/conversations/:id
+```
+**Auth:** Required (Customer, Restaurant, Admin)
+
+**Response `200`:**
+```json
+{
+  "success": true
+}
+```
+
+#### Send Message inside Conversation
+```
+POST /chatbot/conversations/:id/message
+```
+**Auth:** Required (Customer, Restaurant, Admin)
+
+**Body:**
+```json
+{
+  "message": "Suggest some spicy burgers"
+}
+```
+
+**Response `201`:**
+```json
+{
+  "reply": "You can try the Classic Smash Burger at Burger Forge..."
+}
+```
+
+**Behavior**: Automatically updates the chat session's title from *"New Chat"* using LLM summarization.
+
+---
+
 ## Error Responses
 
 All errors follow NestJS standard format:
@@ -580,6 +681,11 @@ All errors follow NestJS standard format:
 | PATCH | `/orders/:id/cancel` | Yes | admin |
 | PATCH | `/orders/:id/status` | Yes | restaurant, admin |
 | POST | `/chatbot/message` | Yes | Any |
+| GET | `/chatbot/conversations` | Yes | Any |
+| POST | `/chatbot/conversations` | Yes | Any |
+| GET | `/chatbot/conversations/:id/messages` | Yes | Any |
+| DELETE | `/chatbot/conversations/:id` | Yes | Any |
+| POST | `/chatbot/conversations/:id/message` | Yes | Any |
 
 ## Postman Collection
 
