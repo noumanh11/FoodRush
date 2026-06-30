@@ -1,72 +1,77 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
-  withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
+ baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
+ withCredentials: true,
+ headers: { 'Content-Type': 'application/json' },
 });
 
 function formatApiError(error: unknown): string {
-  if (!axios.isAxiosError(error)) {
-    return error instanceof Error ? error.message : 'Something went wrong';
-  }
+ if (!axios.isAxiosError(error)) {
+ return error instanceof Error ? error.message : 'Something went wrong';
+ }
 
-  if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-    return 'Cannot reach the server. Start the backend with: cd backend && npm run start:dev';
-  }
+ if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+ return 'Cannot reach the server. Start the backend with: cd backend && npm run start:dev';
+ }
 
-  const message = error.response?.data?.message ?? error.message ?? 'Something went wrong';
-  return Array.isArray(message) ? message[0] : String(message);
+ const message = error.response?.data?.message ?? error.message ?? 'Something went wrong';
+ return Array.isArray(message) ? message[0] : String(message);
 }
 
 api.interceptors.response.use(
-  (res) => res,
-  (error) => Promise.reject(new Error(formatApiError(error))),
+ (res) => res,
+ (error) => Promise.reject(new Error(formatApiError(error))),
 );
 
 export default api;
 
 // Auth
 export const authApi = {
-  register: (data: { email: string; password: string; name: string; role?: string; phone?: string }) =>
-    api.post('/auth/register', data),
-  login: (data: { email: string; password: string }) => api.post('/auth/login', data),
-  logout: () => api.post('/auth/logout'),
-  me: () => api.get('/auth/me'),
+ register: (data: { email: string; password: string; name: string; role?: string; phone?: string }) =>
+ api.post('/auth/register', data),
+ login: (data: { email: string; password: string }) => api.post('/auth/login', data),
+ logout: () => api.post('/auth/logout'),
+ me: () => api.get('/auth/me'),
 };
 
 // Restaurants
 export const restaurantsApi = {
-  getAll: () => api.get('/restaurants'),
-  getOne: (id: string) => api.get(`/restaurants/${id}`),
-  getMy: () => api.get('/restaurants/my'),
-  create: (data: object) => api.post('/restaurants', data),
-  update: (id: string, data: object) => api.patch(`/restaurants/${id}`, data),
+ getAll: () => api.get('/restaurants'),
+ getOne: (id: string) => api.get(`/restaurants/${id}`),
+ getMy: () => api.get('/restaurants/my'),
+ create: (data: object) => api.post('/restaurants', data),
+ update: (id: string, data: object) => api.patch(`/restaurants/${id}`, data),
 };
 
 // Menus
 export const menusApi = {
-  getByRestaurant: (restaurantId: string) => api.get(`/restaurants/${restaurantId}/menu`),
-  create: (restaurantId: string, data: object) =>
-    api.post(`/restaurants/${restaurantId}/menu`, data),
-  update: (id: string, data: object) => api.patch(`/menu/${id}`, data),
-  remove: (id: string) => api.delete(`/menu/${id}`),
+ getByRestaurant: (restaurantId: string) => api.get(`/restaurants/${restaurantId}/menu`),
+ create: (restaurantId: string, data: object) =>
+ api.post(`/restaurants/${restaurantId}/menu`, data),
+ update: (id: string, data: object) => api.patch(`/menu/${id}`, data),
+ remove: (id: string) => api.delete(`/menu/${id}`),
 };
 
 // Orders
 export const ordersApi = {
-  create: (data: object) => api.post('/orders', data),
-  getMy: () => api.get('/orders/my'),
-  getRestaurantOrders: (restaurantId: string) =>
-    api.get(`/orders/restaurant/${restaurantId}`),
-  getAllAdmin: () => api.get('/orders/admin/all'),
-  getOne: (id: string) => api.get(`/orders/${id}`),
-  updateStatus: (id: string, status: string) =>
-    api.patch(`/orders/${id}/status`, { status }),
-  cancel: (id: string) => api.patch(`/orders/${id}/cancel`),
+ create: (data: object) => api.post('/orders', data),
+ getMy: () => api.get('/orders/my'),
+ getRestaurantOrders: (restaurantId: string) =>
+ api.get(`/orders/restaurant/${restaurantId}`),
+ getAllAdmin: () => api.get('/orders/admin/all'),
+ getOne: (id: string) => api.get(`/orders/${id}`),
+ updateStatus: (id: string, status: string) =>
+ api.patch(`/orders/${id}/status`, { status }),
+ cancel: (id: string) => api.patch(`/orders/${id}/cancel`),
 };
 
 // Chatbot
 export const chatbotApi = {
-  send: (message: string) => api.post('/chatbot/message', { message }),
+  send: (message: string, history?: any[]) => api.post('/chatbot/message', { message, history }),
+  getConversations: () => api.get('/chatbot/conversations'),
+  createConversation: () => api.post('/chatbot/conversations'),
+  getMessages: (id: string) => api.get(`/chatbot/conversations/${id}/messages`),
+  deleteConversation: (id: string) => api.delete(`/chatbot/conversations/${id}`),
+  sendMessage: (id: string, message: string) => api.post(`/chatbot/conversations/${id}/message`, { message }),
 };
