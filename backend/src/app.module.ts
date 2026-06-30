@@ -13,6 +13,8 @@ import { Restaurant } from './restaurants/restaurant.entity';
 import { MenuItem } from './restaurants/menu-item.entity';
 import { Order } from './orders/order.entity';
 import { OrderItem } from './orders/order-item.entity';
+import { ChatConversation } from './chatbot/chat-conversation.entity';
+import { ChatMessageEntity } from './chatbot/chat-message.entity';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { OrderItem } from './orders/order-item.entity';
         username: config.get('DB_USERNAME', 'postgres'),
         password: config.get('DB_PASSWORD', 'password'),
         database: config.get('DB_NAME', 'food_ordering_db'),
-        entities: [User, Restaurant, MenuItem, Order, OrderItem],
+        entities: [User, Restaurant, MenuItem, Order, OrderItem, ChatConversation, ChatMessageEntity],
         synchronize: config.get('NODE_ENV') !== 'production',
         migrations: ['dist/migrations/*.js'],
         migrationsRun: config.get('NODE_ENV') === 'production',

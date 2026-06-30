@@ -7,6 +7,8 @@ import { MenusService } from './menus/menus.service';
 import { User, UserRole } from './users/user.entity';
 import { Restaurant } from './restaurants/restaurant.entity';
 import { MenuItem } from './restaurants/menu-item.entity';
+import { Order } from './orders/order.entity';
+import { OrderItem } from './orders/order-item.entity';
 import { CUSTOMERS, RESTAURANTS, IMG } from './seed-data';
 
 async function ensureUser(
@@ -123,6 +125,62 @@ async function bootstrap() {
         owner.id,
       );
       console.log(`  ✅ Menu item: ${item.name}`);
+    }
+  }
+
+  // Create sample orders for demonstration
+  const orderRepo = app.get(getRepositoryToken(Order));
+  const orderItemRepo = app.get(getRepositoryToken(OrderItem));
+
+  const demoCustomer = await usersService.findByEmail('customer@foodrush.com');
+  const demoOwner = await usersService.findByEmail('restaurant@foodrush.com');
+  const demoRestaurant = await restaurantsService.findByOwner(demoOwner.id);
+  const demoMenuItems = await menusService.findByRestaurant(demoRestaurant.id);
+
+  if (demoCustomer && demoRestaurant && demoMenuItems.length > 0) {
+    const existingOrders = await orderRepo.find({ where: { userId: demoCustomer.id } });
+    if (existingOrders.length === 0) {
+      console.log('\n📦 Seeding demo orders...');
+      
+      const states = [
+        { status: 'delivered', daysAgo: 5, items: [{ item: demoMenuItems[0], qty: 2 }, { item: demoMenuItems[1], qty: 1 }] },
+        { status: 'delivered', daysAgo: 3, items: [{ item: demoMenuItems[0], qty: 1 }, { item: demoMenuItems[4], qty: 2 }] },
+        { status: 'delivered', daysAgo: 1, items: [{ item: demoMenuItems[2], qty: 1 }, { item: demoMenuItems[5], qty: 1 }] },
+        { status: 'pending', daysAgo: 0, items: [{ item: demoMenuItems[0], qty: 1 }] },
+        { status: 'confirmed', daysAgo: 0, items: [{ item: demoMenuItems[3], qty: 1 }] },
+      ];
+
+      for (const s of states) {
+        const orderItems: any[] = s.items.map(si => {
+          const subtotal = Number(si.item.price) * si.qty;
+          return orderItemRepo.create({
+            menuItemId: si.item.id,
+            menuItemName: si.item.name,
+            quantity: si.qty,
+            unitPrice: si.item.price,
+            subtotal,
+          });
+        });
+
+        const totalAmount = orderItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
+        const orderDate = new Date();
+        orderDate.setDate(orderDate.getDate() - s.daysAgo);
+
+        const order = orderRepo.create({
+          userId: demoCustomer.id,
+          restaurantId: demoRestaurant.id,
+          totalAmount,
+          status: s.status as any,
+          deliveryAddress: 'DHA Phase 5, Karachi',
+          notes: 'Deliver hot, please!',
+          items: orderItems,
+          createdAt: orderDate,
+          updatedAt: orderDate,
+        });
+
+        await orderRepo.save(order);
+        console.log(`  ✅ Seeded ${s.status} order (Total: PKR ${totalAmount})`);
+      }
     }
   }
 

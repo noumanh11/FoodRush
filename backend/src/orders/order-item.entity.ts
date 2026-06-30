@@ -32,10 +32,10 @@ export class OrderItem {
   @Column()
   orderId: string;
 
-  @ManyToOne(() => MenuItem, (item) => item.orderItems)
+  @ManyToOne(() => MenuItem, (item) => item.orderItems, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'menuItemId' })
-  menuItem: MenuItem;
+  menuItem: MenuItem | null;
 
-  @Column()
-  menuItemId: string;
+  @Column({ nullable: true })
+  menuItemId: string | null;
 }
